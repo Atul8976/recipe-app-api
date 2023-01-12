@@ -1,0 +1,15 @@
+version: '3.9'  # this is inbuild syntax for define composer version
+
+services:
+  app:       #app is name of our app
+    build: 
+      context: .  #use current directory to run docker container
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000" # mapping local 8000 port with 8000 port inside our docker container
+    volumes:
+      - ./app:/app  # volumes are way of mapping directories from our system into docker container
+    command: >  #command is used to run docker container
+      sh -c "python manage.py runserver 0.0.0.0:8000"  
+    

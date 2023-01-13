@@ -2,7 +2,7 @@ version: '3.9'  # this is inbuild syntax for define composer version
 
 services:
   app:       #app is name of our app
-    build: 
+    build:
       context: .  #use current directory to run docker container
       args:
         - DEV=true
@@ -11,5 +11,25 @@ services:
     volumes:
       - ./app:/app  # volumes are way of mapping directories from our system into docker container
     command: >  #command is used to run docker container
-      sh -c "python manage.py runserver 0.0.0.0:8000"  
-    
+      sh -c "python manage.py wait_for_db &&
+            python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine  #lightweight podtgresql image
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data #pointing local varibale to location of data on docker image
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+
+volumes:
+  dev-db-data:
